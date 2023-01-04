@@ -15,10 +15,10 @@ db.sqlite3
 # Build #
 build
 dist
-package.egg-info/
+mcslopes.egg-info/
 
 # setuptools_scm generated  #
-package/version.py 
+mcslopes/version.py 
 
 # Development #
 .ipynb_checkpoints/
