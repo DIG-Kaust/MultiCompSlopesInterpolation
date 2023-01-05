@@ -104,7 +104,7 @@ def multicomponent_slopes(data, dx, dt, thresh=1e-3, nmedian=5):
     return slope_mc
 
 
-def multicomponent_slopes_inverse(data, dx, dt, reg=1e-1, iter_lim=100):
+def multicomponent_slopes_inverse(data, dx, dt, graddata=None, Rop=None, reg=1e-1, **kwargs_solver):
     """Local slopes from multi-component data by smoothed division
 
     Calculates local slopes from multi-component data by smoothed division of spatial and
@@ -112,16 +112,22 @@ def multicomponent_slopes_inverse(data, dx, dt, reg=1e-1, iter_lim=100):
 
     Parameters
     ----------
-    d : :obj:`np.ndarray`
+    data : :obj:`np.ndarray`
         Data of size :math:`n_x \times n_t`
     dx : :obj:`float`
         Space sampling
     dt : :obj:`float`
         Time sampling
-    reg : :obj:`float`
+    graddata : :obj:`np.ndarray`, optional
+        Gradient data of size :math:`n_x \times n_t`. If not provided, it will be computed
+        internally from ``data`` (for this to be successfull `data`` must be alias-free along
+        the spatial axis)
+    Rop : :obj:`pylops.LinearOperator`, optional
+        Restriction operator to apply to ``data`` and ``graddata``
+    reg : :obj:`float`, optional
         Regularization parameter for Laplacian
-    iter_lim : :obj:`int`
-        Number of iterations of LSQR
+    kwargs_solver : :obj:`dict`, optional
+        Additional arguments to pass to the solver
 
     Parameters
     ----------
@@ -132,17 +138,30 @@ def multicomponent_slopes_inverse(data, dx, dt, reg=1e-1, iter_lim=100):
     nx, nt = data.shape
     
     # compute time and space derivatives
-    Fx = FirstDerivative((nx, nt), axis=0, sampling=dx, order=5, edge=True)
     Ft = FirstDerivative((nx, nt), axis=1, sampling=dt, order=5, edge=True)
-    data_dx = Fx * data
     data_dt = Ft * data
+
+    if graddata is None:
+        Fx = FirstDerivative((nx, nt), axis=0, sampling=dx, order=5, edge=True)
+        data_dx = Fx * data
+    else:
+        data_dx = graddata
+
+    # decimate
+    if Rop is not None:
+        data_dt = Rop @ data_dt
+        data_dx = Rop @ data_dx
 
     # compute slopes
     Ddt = pylops.Diagonal(data_dt)
     Lop = pylops.Laplacian((nx, nt))
 
+    # define decimated operator
+    if Rop is not None:
+        Ddt = Ddt @ Rop
+
     slope_mc = pylops.optimization.leastsquares.regularized_inversion(
-        Ddt, -data_dx.ravel(), [Lop], epsRs=[reg], **dict(iter_lim=iter_lim))[0]
+        Ddt, -data_dx.ravel(), [Lop], epsRs=[reg], **kwargs_solver)[0]
     slope_mc = slope_mc.reshape(nx, nt).T
     
     return slope_mc
