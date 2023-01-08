@@ -1,22 +1,32 @@
 ![LOGO](https://github.com/DIG-Kaust/Project_Template/blob/master/logo.png)
 
-Reproducible material for **XXX -
-Ravasi M., Author M., Author C.** submitted to XXX.
+``mcslopes`` is a Python library providing the fundamental building blocks to perform local slopes estimation and slope-assisted
+data reconstruction of multi-component seismic data. It is primarily built on top of PyLops and contains both CPU and GPU versions
+of each code (see ``notebooks`` and ``scripts`` folder). 
 
+Note that the ``USE_CUPY`` variable can be used to switch between the CPU and GPU versions of each code. Also note that the CPU 
+version of the ``overthrust3d`` example will be very slow compared to its GPU equivalent!
+
+For more details refer to the accompanying paper **Multi-component local slopes and thier application to wavefield reconstruction problems
+Ravasi M., Vasconcelos I.** submitted to EAGE 2023.
 
 ## Project structure
 This repository is organized as follows:
 
-* :open_file_folder: **package**: python library containing routines for ....;
-* :open_file_folder: **data**: folder containing data (or instructions on how to retrieve the data
+* :open_file_folder: **mcslopes**: python library containing routines for local slopes estimation and slope-assisted
+data reconstruction of multi-component seismic data;
+* :open_file_folder: **data**: folder containing data;
 * :open_file_folder: **notebooks**: set of jupyter notebooks reproducing the experiments in the paper (see below for more details);
-* :open_file_folder: **scripts**: set of python scripts used to run multiple experiments ...
+* :open_file_folder: **scripts**: set of python scripts used to run the slope-assisted 
+  data reconstruction algorithm on any data of choise.
 
 ## Notebooks
 The following notebooks are provided:
 
-- :orange_book: ``X1.ipynb``: notebook performing ...;
-- :orange_book: ``X2.ipynb``: notebook performing ...
+- :orange_book: ``gom/Interpolation_GOM.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
+  multi-channel data reconstruction on a 2D shot gather from the Missisipi Canyon data;
+- :orange_book: ``overthrust3d/Interpolation_Ove3D.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
+  multi-channel data reconstruction on a 3D shot gather modelled from the SEG/EAGE Overthrust model;
 
 
 ## Getting started :space_invader: :robot:
@@ -37,7 +47,7 @@ pip install -e .
 
 Remember to always activate the environment by typing:
 ```
-conda activate my_env
+conda activate mcslopes
 ```
 
 Finally, to run tests simply type:

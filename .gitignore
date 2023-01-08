@@ -16,10 +16,21 @@ db.sqlite3
 build
 dist
 mcslopes.egg-info/
+.eggs
 
 # setuptools_scm generated  #
 mcslopes/version.py 
 
 # Development #
 .ipynb_checkpoints/
+notebooks/gom/Create_data.ipynb
+notebooks/overthrust3d/Create_data.ipynb
+
+# figures
+figs/gom
+figs/overthrust3d
+
+# data
+data/dat_full13350.rsf@
+data/gom_raw_shot0.npy
 
