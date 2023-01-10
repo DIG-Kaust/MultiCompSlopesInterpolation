@@ -1,8 +1,10 @@
 import numpy as np
 
 from scipy.signal import butter, filtfilt
-from pylops.basicoperators import Diagonal, Restriction
+from pylops.basicoperators import Diagonal, Restriction, FirstDerivative
 from pylops.signalprocessing import FFT2D, FFTND
+from mcslopes.nmoinv import NMO
+from mcslopes.slopes import analytic_local_slope
 
 
 def butter_lowpass(cutoff, fs, order=5):
@@ -22,7 +24,11 @@ def mask(data, thresh, itoff=20):
     nx, nt = data.shape
     masktx = np.ones((nx, nt))
     for ix in range(nx):
-        masktx[ix, :max(0, np.where(np.abs(data[ix]) > thresh)[0][0] - itoff)] = 0.
+        itmask = np.where(np.abs(data[ix]) > thresh)[0]
+        if len(itmask) > 0:
+            masktx[ix, :max(0, itmask[0] - itoff)] = 0.
+        else:
+            masktx[ix] = masktx[ix - 1]
     return masktx
 
 
@@ -40,6 +46,16 @@ def subsample(data, nsub, dtype="float64"):
     data_mask = Rop.mask(data.ravel())
 
     return data_obs, data_mask, Rop
+
+def restriction(nx, nsub, nt, dtype="float64"):
+    # identify available traces
+    traces_index = np.arange(nx)
+    traces_index_sub = traces_index[::nsub]
+
+    # Define restriction operator
+    Rop = Restriction(dims=(nx, nt), iava=traces_index_sub, axis=0, dtype=dtype)
+
+    return Rop
 
 
 def gradient_data(data, nfft_x, nfft_t, dx, dt):
@@ -70,6 +86,28 @@ def gradient_data(data, nfft_x, nfft_t, dx, dt):
     sc2 = np.max(np.abs(data)) / np.max(np.abs(d2))
 
     return d1, d2, sc1, sc2, Fop, D1op, D2op, D, D1, D2, ks, f
+
+
+def gradient_nmo_data(data, grad, t, x, vnmo=1500.):
+
+    nx, nt = data.shape
+    dt = t[1] - t[0]
+    NMOOp = NMO(t, x, vnmo * np.ones(nt))
+
+    # NMO of px
+    pxnmo = NMOOp @ grad
+
+    # NMO of pt
+    Dtop = FirstDerivative((nx, nt), axis=1, sampling=dt, order=5, edge=True)
+    pt = Dtop @ data
+
+    ptnmo = NMOOp @ pt
+    dt_dx = analytic_local_slope(data, dt, x, vnmo, 0, False)
+
+    # NMO of grad data
+    gradnmo = np.real(pxnmo + ptnmo * dt_dx.T)
+
+    return gradnmo, pxnmo, ptnmo, dt_dx
 
 
 def gradient_data3d(data, nfft_y, nfft_x, nfft_t, dy, dx, dt, dtype="complex128"):

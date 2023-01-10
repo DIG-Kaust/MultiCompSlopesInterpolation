@@ -25,6 +25,7 @@ The following notebooks are provided:
 
 - :orange_book: ``others/Slopes_comparison_hyperbolic.ipynb``: notebook comparing different slope estimation methods
   on a set of hyperbolic events;
+- :orange_book: ``others/NMO_gradient.ipynb``: notebook computing NMO of gradient data as in Robertsson et al., 2008;
 - :orange_book: ``gom/Interpolation_GOM.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
   multi-channel data reconstruction on a 2D shot gather from the Missisipi Canyon data;
 - :orange_book: ``overthrust3d/Interpolation_Ove3D.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 

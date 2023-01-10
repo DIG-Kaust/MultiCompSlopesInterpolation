@@ -14,3 +14,6 @@ dependencies:
   - ipython
   - jupyter
   - pylops
+  - pip:
+    - pyyaml
+

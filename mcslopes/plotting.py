@@ -25,20 +25,23 @@ def plotting_style():
     plt.rc('font', serif='Times New Roman')  # fontsize of the figure title
 
 
-def plot_reconstruction_2d(data, datarec, Fop, dx, f, ks, vel):
+def plot_reconstruction_2d(data, datarec, Fop, x, t, dx, f, ks, vel):
     D = Fop * data
     Drec = Fop * datarec
     nt = data.shape[1]
 
     fig, axs = plt.subplots(2, 3, figsize=(12, 12), gridspec_kw={'height_ratios': [2, 1]})
-    axs[0, 0].imshow(data.T, cmap='gray', aspect='auto', vmin=-1, vmax=1)
+    axs[0, 0].imshow(data.T, cmap='gray', aspect='auto', vmin=-1, vmax=1,
+                     extent=(x[0], x[-1], t[-1], t[0]))
     axs[0, 0].set_title('Original')
     axs[0, 0].set_xlabel('Offset (m)')
     axs[0, 0].set_ylabel('TWT (s)')
-    axs[0, 1].imshow(datarec.T, cmap='gray', aspect='auto', vmin=-1, vmax=1)
+    axs[0, 1].imshow(datarec.T, cmap='gray', aspect='auto', vmin=-1, vmax=1,
+                     extent=(x[0], x[-1], t[-1], t[0]))
     axs[0, 1].set_title('Reconstructed')
     axs[0, 1].set_xlabel('Offset (m)')
-    axs[0, 2].imshow(data.T - datarec.T, cmap='gray', aspect='auto', vmin=-1, vmax=1)
+    axs[0, 2].imshow(data.T - datarec.T, cmap='gray', aspect='auto', vmin=-1, vmax=1,
+                     extent=(x[0], x[-1], t[-1], t[0]))
     axs[0, 2].set_title('Error')
     axs[0, 2].set_xlabel('Offset (m)')
 

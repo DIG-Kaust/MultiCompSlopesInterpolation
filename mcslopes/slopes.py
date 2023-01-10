@@ -5,11 +5,11 @@ from scipy.ndimage import median_filter
 from pylops.basicoperators import FirstDerivative
 
 
-def analytic_local_slope(d, dt, x, v0, kv):
+def analytic_local_slope(d, dt, x, v0, kv, at_t=True):
     """Analytical local slopes for hyperbolic events
 
     Calculates analytical slope for hyperbolic events with
-    linearly increase root-mean square velocity: :math:`v_{rms}(t_0) = v_0 + k_v*t_0`
+    linearly increasing root-mean square velocity: :math:`v_{rms}(t_0) = v_0 + k_v*t_0`
 
     Parameters
     ----------
@@ -23,6 +23,9 @@ def analytic_local_slope(d, dt, x, v0, kv):
         Initial velocity at :math:`t_0 = 0 s`
     kv : :obj:`float`
         Velocity gradient
+    at_t : :obj:`bool`, optional
+        Return slopes at ``(t,x)`` (``True``) or
+        ``(t0,x)`` (``False``)
 
     Parameters
     ----------
@@ -42,10 +45,13 @@ def analytic_local_slope(d, dt, x, v0, kv):
         for ix in range(nx):
             tapp = np.sqrt(t[it0]**2 + (x[ix]/v_rms[it0])**2)
             it = (np.floor(tapp/dt+1)).astype(int)
-            
-            if it < nt:
-                slope[it, ix] = x[ix] / (tapp * (v_rms[it0])**2)
-    
+
+            if at_t:
+                if it < nt:
+                    slope[it, ix] = x[ix] / (tapp * (v_rms[it0])**2)
+            else:
+                slope[it0, ix] = x[ix] / (tapp * (v_rms[it0])**2)
+
     # Put 0s to max value
     slope[slope == 0.] = np.nanmax(slope)
     
@@ -53,6 +59,86 @@ def analytic_local_slope(d, dt, x, v0, kv):
     slope[:, 0] = 0.
 
     return slope
+
+
+from typing import Tuple
+
+import numpy as np
+import numpy.typing as npt
+from scipy.ndimage import gaussian_filter
+
+from pylops.utils.backend import get_array_module, get_toeplitz
+from pylops.utils.typing import NDArray
+
+
+def structure_tensor(d, dz=1.0, dx=1.0, smooth=5, eps=0.0, dips=False):
+    r"""Local slope estimation with structure tensor algorithm
+
+    This is a slighly modified version of :func:`pylops.utils.signalprocessing.slope_estimate` where fifth-order
+    derivatives are used for the gradient leading to more accurate derivatives.
+
+    Parameters
+    ----------
+    d : :obj:`np.ndarray`
+        Input dataset of size :math:`n_z \times n_x`
+    dz : :obj:`float`, optional
+        Sampling in :math:`z`-axis, :math:`\Delta z`
+    dx : :obj:`float`, optional
+        Sampling in :math:`x`-axis, :math:`\Delta x`
+    smooth : :obj:`float` or :obj:`np.ndarray`, optional
+        Standard deviation for Gaussian kernel. The standard deviations of the
+        Gaussian filter are given for each axis as a sequence, or as a single number,
+        in which case it is equal for all axes.
+    eps : :obj:`float`, optional
+        Regularization term. All slopes where
+        :math:`|g_{zx}| < \epsilon \max_{(x, z)} \{|g_{zx}|, |g_{zz}|, |g_{xx}|\}`
+        are set to zero. All anisotropies where :math:`\lambda_\text{max} < \epsilon`
+        are also set to zero. See Notes. When using with small values of ``smooth``,
+        start from a very small number (e.g. 1e-10) and start increasing by a power
+        of 10 until results are satisfactory.
+
+    Returns
+    -------
+    slopes : :obj:`np.ndarray`
+        Estimated local slopes. The unit is that of
+        :math:`\Delta z/\Delta x`.
+
+    """
+    slopes = np.zeros_like(d)
+    anisos = np.zeros_like(d)
+
+    # gz, gx = np.gradient(d, dz, dx)
+    Gx = pylops.FirstDerivative(dims=d.shape, axis=1, sampling=dx, order=5, edge=True)
+    Gz = pylops.FirstDerivative(dims=d.shape, axis=0, sampling=dz, order=5, edge=True)
+    gz, gx = Gz @ d, Gx @ d
+
+    gzz, gzx, gxx = gz * gz, gz * gx, gx * gx
+
+    # smoothing
+    gzz = gaussian_filter(gzz, sigma=smooth)
+    gzx = gaussian_filter(gzx, sigma=smooth)
+    gxx = gaussian_filter(gxx, sigma=smooth)
+
+    gmax = max(gzz.max(), gxx.max(), np.abs(gzx).max())
+    if gmax <= eps:
+        return np.zeros_like(d), anisos
+
+    gzz /= gmax
+    gzx /= gmax
+    gxx /= gmax
+
+    lcommon1 = 0.5 * (gzz + gxx)
+    lcommon2 = 0.5 * np.sqrt((gzz - gxx) ** 2 + 4 * gzx ** 2)
+    l1 = lcommon1 + lcommon2
+    l2 = lcommon1 - lcommon2
+
+    regdata = l1 > eps
+    anisos[regdata] = 1 - l2[regdata] / l1[regdata]
+
+    regdata = np.abs(gzx) > eps
+    slopes[regdata] = (l1 - gzz)[regdata] / gzx[regdata]
+
+    return slopes, anisos
 
 
 def multicomponent_slopes(data, dx, dt, thresh=1e-3, nmedian=5):
