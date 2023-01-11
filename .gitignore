@@ -23,8 +23,8 @@ mcslopes/version.py
 
 # Development #
 .ipynb_checkpoints/
-notebooks/gom/Create_data.ipynb
-notebooks/overthrust3d/Create_data.ipynb
+notebooks/gom/Create_data_private.ipynb
+notebooks/overthrust3d/Create_data_private.ipynb
 
 # figures
 figs/gom

@@ -26,10 +26,37 @@ The following notebooks are provided:
 - :orange_book: ``others/Slopes_comparison_hyperbolic.ipynb``: notebook comparing different slope estimation methods
   on a set of hyperbolic events;
 - :orange_book: ``others/NMO_gradient.ipynb``: notebook computing NMO of gradient data as in Robertsson et al., 2008;
+- :orange_book: ``gom/Create_data.ipynb``: notebook showing how to synthetically create multi-channel, subsampled data to be fed to
+  our reconstruction notebooks ans scripts;
 - :orange_book: ``gom/Interpolation_GOM.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
   multi-channel data reconstruction on a 2D shot gather from the Missisipi Canyon data;
 - :orange_book: ``overthrust3d/Interpolation_Ove3D.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
   multi-channel data reconstruction on a 3D shot gather modelled from the SEG/EAGE Overthrust model;
+
+
+## Scripts
+The following scripts are provided:
+
+- :orange_book: ``2d/Interpolation_slopes.ipynb``: script performing multi-channel interpolation with local slopes of 2d shot gathers;
+
+Both scripts require an input ``.npz`` file containing the following fields:
+
+- :card_index: ``data``: 2-dimensional pressure data to interpolate of size ``nt x nx``.
+- :card_index: ``grad1``: 2-dimensional first-order gradient data of size ``nt x nx``.
+- :card_index: ``grad2``: 2-dimensional second-order gradient data of size ``nt x nx``.
+- :card_index: ``t``: time axis of size ``nt``.
+- :card_index: ``x``: sparsely sampled spatial axis of size ``nx``.
+- :card_index: ``xorig``: finely sampled spatial axis of size ``nx_orig``. Note that ``subfactor = nx_orig / nx``, which is
+  the subsampling factor of the data.
+
+In synthetic examples one can also provide a second ``.npz`` file containing the following fields (which will be used to compare the
+true wavefield with the reconstructed one):
+
+- :card_index: ``data``: 2-dimensional pressure data to interpolate of size ``nt x nx_orig``.
+- :card_index: ``grad1``: 2-dimensional first-order gradient data of size ``nt x nx_orig``.
+- :card_index: ``grad2``: 2-dimensional second-order gradient data of size ``nt x nx_orig``.
+- :card_index: ``t``: time axis of size ``nt``.
+- :card_index: ``x``: finely sampled spatial axis of size ``nx_orig``.
 
 
 ## Getting started :space_invader: :robot:
