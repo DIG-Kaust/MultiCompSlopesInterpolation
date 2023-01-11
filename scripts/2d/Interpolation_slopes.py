@@ -258,5 +258,5 @@ def main(parser):
     plt.show()
 
 if __name__ == "__main__":
-    description = 'Interpolation with local-slopes'
+    description = '2D Multi-Channel Interpolation with local slopes'
     main(argparse.ArgumentParser(description=description))
