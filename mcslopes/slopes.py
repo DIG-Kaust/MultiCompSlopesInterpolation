@@ -1,7 +1,7 @@
 import numpy as np
 import pylops
 
-from scipy.ndimage import median_filter
+from scipy.ndimage import median_filter, gaussian_filter
 from pylops.basicoperators import FirstDerivative
 
 
@@ -55,20 +55,70 @@ def analytic_local_slope(d, dt, x, v0, kv, at_t=True):
     # Put 0s to max value
     slope[slope == 0.] = np.nanmax(slope)
     
-    # Put Nans to 0
+    # Put first spatial sample to 0
     slope[:, 0] = 0.
 
     return slope
 
 
-from typing import Tuple
+def analytic_local_slope3d(d, dt, y, x, v0, kv, at_t=True):
+    """Analytical local slopes for hyperbolic events in 3d data
 
-import numpy as np
-import numpy.typing as npt
-from scipy.ndimage import gaussian_filter
+    Calculates analytical slope for hyperbolic events with
+    linearly increasing root-mean square velocity: :math:`v_{rms}(t_0) = v_0 + k_v*t_0`
 
-from pylops.utils.backend import get_array_module, get_toeplitz
-from pylops.utils.typing import NDArray
+    Parameters
+    ----------
+    d : :obj:`np.ndarray`
+        Data of size :math:`n_y \times n_x \times n_t`
+    dt : :obj:`float`
+        Time sampling
+    x : :obj:`np.ndarray`
+        Crossline axis
+    x : :obj:`np.ndarray`
+        Inline axis
+    v0 : :obj:`float`
+        Initial velocity at :math:`t_0 = 0 s`
+    kv : :obj:`float`
+        Velocity gradient
+    at_t : :obj:`bool`, optional
+        Return slopes at ``(t,x)`` (``True``) or
+        ``(t0,x)`` (``False``)
+
+    Parameters
+    ----------
+    slope : :obj:`np.ndarray`
+        Local slopes of size :math:`n_x \times n_t`
+
+    """
+
+    [ny, nx, nt] = d.shape
+    t = np.arange(nt) * dt
+
+    v_rms = v0 + kv * t
+
+    slope = np.zeros((ny, nx, nt))
+
+    for iy in range(ny):
+        for ix in range(nx):
+            for it0 in range(int(nt)):
+                h = np.sqrt(y[iy]**2 + x[ix]**2)
+                tapp = np.sqrt(t[it0] ** 2 + (h / v_rms[it0]) ** 2)
+                it = (np.floor(tapp / dt + 1)).astype(int)
+
+                if at_t:
+                    if it < nt:
+                        slope[iy, ix, it] = y[iy] / (tapp * (v_rms[it0]) ** 2)
+                else:
+                    slope[iy, ix, it0] = y[iy] / (tapp * (v_rms[it0]) ** 2)
+
+    slope[np.isnan(slope)] = 0.
+
+    # Put first spatial samples to 0
+    #slope[0, :, :] = 0.
+    #slope[:, 0, :] = 0.
+
+    return slope
 
 
 def structure_tensor(d, dz=1.0, dx=1.0, smooth=5, eps=0.0, dips=False):

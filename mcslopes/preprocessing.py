@@ -4,7 +4,8 @@ from scipy.signal import butter, filtfilt
 from pylops.basicoperators import Diagonal, Restriction, FirstDerivative
 from pylops.signalprocessing import FFT2D, FFTND
 from mcslopes.nmoinv import NMO
-from mcslopes.slopes import analytic_local_slope
+from mcslopes.nmoinv3D import NMO as NMO3D
+from mcslopes.slopes import analytic_local_slope, analytic_local_slope3d
 
 
 def butter_lowpass(cutoff, fs, order=5):
@@ -47,6 +48,7 @@ def subsample(data, nsub, dtype="float64"):
 
     return data_obs, data_mask, Rop
 
+
 def restriction(nx, nsub, nt, dtype="float64"):
     # identify available traces
     traces_index = np.arange(nx)
@@ -54,6 +56,16 @@ def restriction(nx, nsub, nt, dtype="float64"):
 
     # Define restriction operator
     Rop = Restriction(dims=(nx, nt), iava=traces_index_sub, axis=0, dtype=dtype)
+
+    return Rop
+
+def restriction3d(ny, nx, nsub, nt, dtype="float64"):
+    # identify available traces
+    traces_index = np.arange(ny)
+    traces_index_sub = traces_index[::nsub]
+
+    # Define restriction operator
+    Rop = Restriction(dims=(ny, nx, nt), iava=traces_index_sub, axis=0, dtype=dtype)
 
     return Rop
 
@@ -110,16 +122,13 @@ def gradient_nmo_data(data, grad, t, x, vnmo=1500.):
     return gradnmo, pxnmo, ptnmo, dt_dx
 
 
-def gradient_data3d(data, nfft_y, nfft_x, nfft_t, dy, dx, dt, dtype="complex128"):
+def gradient_data3d(data, nfft_y, nfft_x, nfft_t, dy, dx, dt, dtype="complex128", computegraddata=True):
     ny, nx, nt = data.shape
     f = np.fft.rfftfreq(nfft_t, dt)
     kys = np.fft.fftfreq(nfft_x, dy)
     kxs = np.fft.fftfreq(nfft_x, dx)
     Fop = FFTND(dims=(ny, nx, nt), nffts=(nfft_y, nfft_x, nfft_t),
                 sampling=[dy, dx, dt], real=True, dtype=dtype)
-
-    # apply FK transform to data
-    D = Fop * data
 
     # Compute derivatives in FK domain
     coeff1 = 1j * 2 * np.pi * kys
@@ -133,17 +142,44 @@ def gradient_data3d(data, nfft_y, nfft_x, nfft_t, dy, dx, dt, dtype="complex128"
     D1op = Diagonal(coeff1.astype(dtype), dtype=dtype)
     D2op = Diagonal(coeff2.astype(dtype), dtype=dtype)
 
-    D1 = D1op * D
-    D2 = D2op * D
+    d1, d2, sc1, sc2, D, D1, D2 = None, None, None, None, None, None, None
+    if computegraddata:
+        # apply FK transform to data
+        D = Fop * data
 
-    d1 = np.real(Fop.H * D1)
-    d2 = np.real(Fop.H * D2)
+        D1 = D1op * D
+        D2 = D2op * D
 
-    # Compute scalars that normalize gradients to data
-    sc1 = np.max(np.abs(data)) / np.max(np.abs(d1))
-    sc2 = np.max(np.abs(data)) / np.max(np.abs(d2))
+        d1 = np.real(Fop.H * D1)
+        d2 = np.real(Fop.H * D2)
+
+        # Compute scalars that normalize gradients to data
+        sc1 = np.max(np.abs(data)) / np.max(np.abs(d1))
+        sc2 = np.max(np.abs(data)) / np.max(np.abs(d2))
 
     return d1, d2, sc1, sc2, Fop, D1op, D2op, D, D1, D2, kys, kxs, f
+
+
+def gradient_nmo_data3d(data, grad, t, y, x, vnmo=1500.):
+
+    ny, nx, nt = data.shape
+    dt = t[1] - t[0]
+    NMOOp = NMO3D(t, y, x, vnmo * np.ones(nt))
+
+    # NMO of py
+    pynmo = NMOOp @ grad
+
+    # NMO of pt
+    Dtop = FirstDerivative((ny, nx, nt), axis=2, sampling=dt, order=5, edge=True)
+    pt = Dtop @ data
+
+    ptnmo = NMOOp @ pt
+    dt_dy = analytic_local_slope3d(data, dt, y, x, vnmo, 0, False)
+
+    # NMO of grad data
+    gradnmo = np.real(pynmo + ptnmo * dt_dy)
+
+    return gradnmo, pynmo, ptnmo, dt_dy
 
 
 def fk_filter_design(f, ks, vel, fmax, critical=1.00, koffset=0.002):
