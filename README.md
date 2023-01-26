@@ -37,26 +37,48 @@ The following notebooks are provided:
 ## Scripts
 The following scripts are provided:
 
-- :orange_book: ``2d/Interpolation_slopes.ipynb``: script performing multi-channel interpolation with local slopes of 2d shot gathers;
+- :orange_book: ``2d/Interpolation_slopes.ipynb``: script performing multi-channel interpolation with local slopes of a 2d shot gather;
+- :orange_book: ``3d/Interpolation_slopes.ipynb``: script performing multi-channel interpolation with local slopes of a 3d shot gather.
 
-Both scripts require an input ``.npz`` file containing the following fields:
+Both scripts require an input ``.npz`` file containing the following fields. 
+
+For 2d case:
 
 - :card_index: ``data``: 2-dimensional pressure data to interpolate of size ``nt x nx``.
 - :card_index: ``grad1``: 2-dimensional first-order gradient data of size ``nt x nx``.
 - :card_index: ``grad2``: 2-dimensional second-order gradient data of size ``nt x nx``.
 - :card_index: ``t``: time axis of size ``nt``.
 - :card_index: ``x``: sparsely sampled spatial axis of size ``nx``.
-- :card_index: ``xorig``: finely sampled spatial axis of size ``nx_orig``. Note that ``subfactor = nx_orig / nx``, which is
-  the subsampling factor of the data.
+- :card_index: ``xorig``: finely sampled spatial axis of size ``nx_orig``. Note that ``subfactor = nx_orig / nx``, which is the subsampling factor of the data.
+
+For 3d case:
+
+- :card_index: ``data``: 3-dimensional pressure data to interpolate of size ``ny x nx x nt``
+- :card_index: ``grad1``: 3-dimensional first-order gradient data to interpolate of size ``ny x nx x nt``
+- :card_index: ``t``: time axis of size ``nt``.
+- :card_index: ``x``: finely sampled inline axis of size ``nx``.
+- :card_index: ``y``: sparsely sampled crossline axis of size ``ny``
+- :card_index: ``yorig``: finely sampled crossline axis of size ``ny_orig``. Note that ``subfactor = ny_orig / ny``, which is the subsampling factor of the data.
+
 
 In synthetic examples one can also provide a second ``.npz`` file containing the following fields (which will be used to compare the
-true wavefield with the reconstructed one):
+true wavefield with the reconstructed one). 
+
+For 2d case:
 
 - :card_index: ``data``: 2-dimensional pressure data to interpolate of size ``nt x nx_orig``.
 - :card_index: ``grad1``: 2-dimensional first-order gradient data of size ``nt x nx_orig``.
 - :card_index: ``grad2``: 2-dimensional second-order gradient data of size ``nt x nx_orig``.
 - :card_index: ``t``: time axis of size ``nt``.
 - :card_index: ``x``: finely sampled spatial axis of size ``nx_orig``.
+
+For 3d case:
+
+- :card_index: ``data``: 3-dimensional pressure data to interpolate of size ``ny_orig x nx x nt``.
+- :card_index: ``grad1``: 2-dimensional first-order gradient data of size ``ny_orig x nx x nt``.
+- :card_index: ``t``: time axis of size ``nt``.
+- :card_index: ``x``: finely sampled inline axis of size ``nx``.
+- :card_index: ``y``: finely sampled crossline axis of size ``ny``.
 
 
 ## Getting started :space_invader: :robot:
