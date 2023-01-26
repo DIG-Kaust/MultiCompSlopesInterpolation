@@ -14,6 +14,9 @@ from pylops.utils.metrics import snr
 from mcslopes.nmoinv import NMO
 from mcslopes.preprocessing import fk_filter_design, gradient_data, gradient_nmo_data, mask, restriction
 from mcslopes.slopes import multicomponent_slopes_inverse
+from mcslopes.plotting import plotting_style
+
+plotting_style()
 
 
 def main(parser):
@@ -64,16 +67,16 @@ def main(parser):
     sections = ['exp', 'subsampling',
                 'preprocessing', 'fkmasking',
                 'slopeestimation', 'interpolation']
-    print('----------------------------')
+    print('-------------------------------')
     print('Interpolation with local-slopes')
-    print('----------------------------\n')
+    print('-------------------------------\n')
     for section in sections:
         print(section.upper())
         for key, value in setup[section].items():
             print(f'{key} = {value}')
-        print('\n----------------------------\n')
+        print('\n-------------------------------\n')
     print(f'GPU used: {USE_CUPY}')
-    print('----------------------------\n')
+    print('-------------------------------\n')
 
 
     ######### Data loading and preprocessing #########
@@ -159,20 +162,23 @@ def main(parser):
 
     if not use_secondder:
         # only first
-        F2op = VStack([Rop*Fop.H,
-                       sc1*Rop*Fop.H*D1op,
-                       eps_slopes * SRegop * Fop.H]) * Mf
-        data2 = cp_asarray(np.concatenate((data.ravel(), sc1*grad.ravel(), np.zeros(nt*nxorig)), axis=0))
+        Op = VStack([Rop * Fop.H,
+                     sc1 * Rop * Fop.H * D1op,
+                     eps_slopes * SRegop * Fop.H]) * Mf
+        dtot = cp_asarray(np.concatenate((data.ravel(), sc1 * grad.ravel(), np.zeros(nt * nxorig)), axis=0))
     else:
         # 1st and 2nd
-        F2op = VStack([Rop*Fop.H,
-                       sc1*Rop*Fop.H*D1op,
-                       sc2*Rop*Fop.H*D2op,
-                       eps_slopes * SRegop * Fop.H]) * Mf
-        data2 = cp_asarray(np.concatenate((data.ravel(), sc1*grad.ravel(), sc2*grad2.ravel(), np.zeros(nt*nxorig)), axis=0))
+        Op = VStack([Rop * Fop.H,
+                     sc1 * Rop * Fop.H * D1op,
+                     sc2 * Rop * Fop.H * D2op,
+                     eps_slopes * SRegop * Fop.H]) * Mf
+        dtot = cp_asarray(np.concatenate((data.ravel(),
+                                          sc1 * grad.ravel(),
+                                          sc2 * grad2.ravel(),
+                                          np.zeros(nt * nxorig)), axis=0))
 
-    pinv, _, _ = fista(F2op, data2, niter=niter, eps=eps_fk,
-                        eigsdict=dict(niter=5, tol=1e-2), show=True)
+    pinv, _, _ = fista(Op, dtot, niter=niter, eps=eps_fk,
+                       eigsdict=dict(niter=5, tol=1e-2), show=True)
 
     dinv = cp_asnumpy(np.real(Fop.H * Mf * pinv).reshape(nxorig, nt))
 

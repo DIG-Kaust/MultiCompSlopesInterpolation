@@ -1,8 +1,24 @@
 import numpy as np
+import scipy as sp
 import pylops
 
 from scipy.ndimage import median_filter, gaussian_filter
-from pylops.basicoperators import FirstDerivative
+from pylops.basicoperators import Diagonal, FirstDerivative
+
+try:
+    import cupy as cp
+
+    cp_asarray = cp.asarray
+    cp_asnumpy = cp.asnumpy
+    np_floatconv = np.float32
+    np_floatcconv = np.complex64
+    mempool = cp.get_default_memory_pool()
+except:
+    cp = np
+    cp_asarray = np.asarray
+    cp_asnumpy = np.asarray
+    np_floatconv = np.float64
+    np_floatcconv = np.complex128
 
 
 def analytic_local_slope(d, dt, x, v0, kv, at_t=True):
@@ -113,10 +129,6 @@ def analytic_local_slope3d(d, dt, y, x, v0, kv, at_t=True):
                     slope[iy, ix, it0] = y[iy] / (tapp * (v_rms[it0]) ** 2)
 
     slope[np.isnan(slope)] = 0.
-
-    # Put first spatial samples to 0
-    #slope[0, :, :] = 0.
-    #slope[:, 0, :] = 0.
 
     return slope
 
@@ -256,7 +268,7 @@ def multicomponent_slopes_inverse(data, dx, dt, graddata=None, Rop=None, reg=1e-
         Time sampling
     graddata : :obj:`np.ndarray`, optional
         Gradient data of size :math:`n_x \times n_t`. If not provided, it will be computed
-        internally from ``data`` (for this to be successfull `data`` must be alias-free along
+        internally from ``data`` (for this to be successful `data`` must be alias-free along
         the spatial axis)
     Rop : :obj:`pylops.LinearOperator`, optional
         Restriction operator to apply to ``data`` and ``graddata``
@@ -301,5 +313,67 @@ def multicomponent_slopes_inverse(data, dx, dt, graddata=None, Rop=None, reg=1e-
     slope_mc = slope_mc.reshape(nx, nt).T
     
     return slope_mc
+
+
+def multicomponent_slopes_inverse3d(data, dy, dt, graddata, Rop, reg=1e-1, **kwargs_solver):
+    """Local slopes from 3D multi-component data by smoothed division
+
+    Calculates local slopes from multi-component data by smoothed division of spatial and
+    time derivative of the data
+
+    Parameters
+    ----------
+    data : :obj:`np.ndarray`
+        Data of size :math:`n_y \times n_x \times n_t`
+    dy : :obj:`float`
+        Crossline sampling
+    dx : :obj:`float`
+        Inline sampling
+    dt : :obj:`float`
+        Time sampling
+    graddata : :obj:`np.ndarray`, optional
+        Gradient data of size :math:`n_y \times n_x \times n_t`.
+    Rop : :obj:`pylops.LinearOperator`, optional
+        Restriction operator to apply to ``data`` and ``graddata``
+    reg : :obj:`float`, optional
+        Regularization parameter for Laplacian
+    kwargs_solver : :obj:`dict`, optional
+        Additional arguments to pass to the solver
+
+    Parameters
+    ----------
+    slope_mc : :obj:`np.ndarray`
+        Local slopes of size :math:`n_y \times n_x \times n_t`
+
+    """
+    ny, nx, nt = data.shape
+
+    # compute time and space derivatives
+    Ft = FirstDerivative((ny, nx, nt), axis=2, sampling=dt, order=5, edge=True)
+    data_dt = Ft * data
+    data_dy = graddata
+
+    # decimate
+    data_dt = cp_asarray((Rop @ data_dt).astype(np_floatconv))
+    data_dy = cp_asarray((Rop @ data_dy).astype(np_floatconv))
+
+    # compute weight to encorage the slope of weak events to appear at early stage of inversion
+    weight = 1. / (sp.ndimage.gaussian_filter(np.abs(sp.signal.hilbert(cp_asnumpy(data))), sigma=3) + 1e-1)
+    weight = cp_asarray(weight.astype(np_floatconv))
+
+    # compute slopes
+    Wop = Diagonal(cp_asarray((Rop @ weight).astype(np_floatconv)))
+    Dop = pylops.Diagonal(data_dt)
+    Lop = pylops.Laplacian((ny, nx, nt), sampling=(1, 1, 1), axes=(0, 1, 2), weights=(1, 1, 1))
+
+    # define decimated operator
+    if Rop is not None:
+        Dop = Dop @ Rop
+
+    slope_mc = pylops.optimization.leastsquares.regularized_inversion(
+        Wop @ Dop, -(Wop @ data_dy).ravel(), [Lop], epsRs=[reg], **kwargs_solver)[0]
+    slope_mc = cp_asnumpy(slope_mc).reshape(ny, nx, nt)
+
+    return slope_mc, weight
 
 

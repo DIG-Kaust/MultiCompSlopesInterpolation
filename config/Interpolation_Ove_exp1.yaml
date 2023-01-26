@@ -1,0 +1,35 @@
+exp:
+  label: ove3d # dataset label
+  number: 1 # experiment number
+  name: Overthrust3D  - Slopes interpolation with 1st order gradient # experiment name
+  inputfile: ../../data/ove3d_data_sub5.npz # input file with subsampled data
+  truefile: ../../data/ove3d_data_forsub5.npz # input file with finely sampled data for debugging purposes (leave empty if not available)
+
+global:
+  USE_CUPY: True # use cupy or not
+
+subsampling:
+  nsub: 5 # subsampling factor (make sure it agrees with the data)
+
+preprocessing:
+  apply_nmo: True # apply NMO correction prior to interpolation (True) or not (False)
+  vnmo: 2000 # NMO velocity (in m/s)
+  mask_thresh: 0.005 # time-space mask threshold
+  nfft_t: 1024  # lenght of frequency axis (used to compute gradients and perform FK transforms during data reconstruction)
+  nfft_x: 256 # lenght of inline wavenumber axis (used to compute gradients and perform FK transforms during data reconstruction)
+  nfft_y: 256 # lenght of crossline wavenumber axis (used to compute gradients and perform FK transforms during data reconstruction)
+
+fkmasking:
+  vel: 1800. # velocity
+  fmax: 75 # maximum frequency
+  critical: 1.00 # scaling to be applied to the f=k*v line used to create the mask
+  koffset: 0.001 # shift to be applied to the f=k*v line used to create the mask
+
+slopeestimation:
+  eps_slopeest: 600 # regularization factor for smoothing
+  niter_slopeest: 400 # number of iterations of lsqr
+
+interpolation:
+  eps_slopes: 10 # regularization factor for slope consistency term
+  eps_fk: 0.01 # regularization factor for sparsity term
+  niter: 200 # number of iterations of fista
