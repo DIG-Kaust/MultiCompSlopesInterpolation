@@ -1,4 +1,4 @@
-![LOGO](https://github.com/DIG-Kaust/Project_Template/blob/master/logo.png)
+![LOGO](https://github.com/DIG-Kaust/MultiCompSlopesInterpolation/blob/master/asset/logo.png)
 
 ``mcslopes`` is a Python library providing the fundamental building blocks to perform local slopes estimation and slope-assisted
 data reconstruction of multi-component seismic data. It is primarily built on top of PyLops and contains both CPU and GPU versions
