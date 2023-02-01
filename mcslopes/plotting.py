@@ -26,6 +26,32 @@ def plotting_style():
 
 
 def plot_reconstruction_2d(data, datarec, Fop, x, t, dx, f, ks, vel):
+    """2D reconstruction visualization
+
+    Display original and reconstructed datasets and their error.
+
+    Parameters
+    ----------
+    data : :obj:`np.ndarray`
+        Full data of size :math:`n_x \times n_t`
+    datarec : :obj:`np.ndarray`
+        Reconstructed data of size :math:`n_x \times n_t`
+    Fop : :obj:`pylops.LinearOperator`, optional
+        2D Fourier operator
+    x : :obj:`np.ndarray`
+       Spatial axis
+    t : :obj:`np.ndarray`
+       Time axis
+    dx : :obj:`float`
+       Spatial sampling
+    f : :obj:`np.ndarray`
+       Frequency axis
+    ks : :obj:`np.ndarray`
+       Spatial wavenumber axis
+    vel : :obj:`float`
+       Velocity at receivers
+
+    """
     D = Fop * data
     Drec = Fop * datarec
     nt = data.shape[1]
@@ -67,10 +93,27 @@ def plot_reconstruction_2d(data, datarec, Fop, x, t, dx, f, ks, vel):
     plt.tight_layout()
 
 
-def clim(in_content, ratio=95):
+def clim(data, ratio=95):
     """Clipping based on percentiles
+
+    Define clipping values for plotting based on percentiles of input data
+
+    Parameters
+    ----------
+    data : :obj:`np.ndarray`
+        Full data
+    ratio : :obj:`float`
+        Clipping ratio
+
+    Parameters
+    ----------
+    -c : :obj:`float`
+        Minimum value
+    c : :obj:`float`
+        Maximum value
+
     """
-    c = np.percentile(np.absolute(in_content), ratio)
+    c = np.percentile(np.absolute(data), ratio)
     return -c, c
 
 
@@ -136,7 +179,7 @@ def explode_volume(volume, t=None, x=None, y=None,
     filename : :obj:`str`, optional
         Figure full path (if provided the figure is saved at this path)
     save_opts : :obj:`dict`, optional
-        Additonal parameters to be provided to :func:`matplotlib.pyplot.savefig`
+        Additional parameters to be provided to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------

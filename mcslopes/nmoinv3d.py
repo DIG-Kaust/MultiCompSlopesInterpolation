@@ -70,6 +70,36 @@ def nmo_adjoint(dnmo, taxis, yaxis, xaxis, vels_rms):
 
 
 class NMO(LinearOperator):
+    r"""NMO correction
+
+    3D NMO correction operator to be applied to a dataset of size :math:`n_y \times n_x \times n_t`.
+
+    Parameters
+    ----------
+    taxis : :obj:`np.ndarray`
+       Time axis
+    yaxis : :obj:`np.ndarray`
+       Crossline axis
+    xaxis : :obj:`np.ndarray`
+       Inline axis
+    vels_rms : :obj:`np.ndarray`
+       Velocity profile over time to be used for NMO correction
+    dtype : :obj:`str`, optional
+       Type of elements in input array.
+
+    Attributes
+    ----------
+    shape : :obj:`tuple`
+       Operator shape
+    dims : :obj:`tuple`
+       Model dimensions
+    dimsd : :obj:`tuple`
+       Dats dimensions
+    explicit : :obj:`bool`
+       Operator contains a matrix that can be solved explicitly
+       (``True``) or not (``False``)
+
+   """
     def __init__(self, taxis, yaxis, xaxis, vels_rms, dtype=None):
         self.taxis = taxis
         self.xaxis = xaxis
@@ -88,4 +118,3 @@ class NMO(LinearOperator):
     @reshaped
     def _rmatvec(self, y):
         return nmo_adjoint(y, self.taxis, self.yaxis, self.xaxis, self.vels_rms)
-

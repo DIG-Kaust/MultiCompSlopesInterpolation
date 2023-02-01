@@ -5,14 +5,13 @@ import argparse
 import yaml
 
 import numpy as np
-import scipy as sp
 import matplotlib.pyplot as plt
 
 from pylops.basicoperators import *
 from pylops.optimization.sparsity import fista
 from pylops.utils.metrics import snr
 
-from mcslopes.nmoinv3D import NMO
+from mcslopes.nmoinv3d import NMO
 from mcslopes.preprocessing import fk_filter_design3d, gradient_data3d, gradient_nmo_data3d, mask, restriction3d
 from mcslopes.slopes import multicomponent_slopes_inverse3d
 from mcslopes.plotting import plotting_style, explode_volume
