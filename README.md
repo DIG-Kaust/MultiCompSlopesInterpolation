@@ -2,13 +2,13 @@
 
 ``mcslopes`` is a Python library providing the fundamental building blocks to perform local slopes estimation and slope-assisted
 data reconstruction of multi-component seismic data. It is primarily built on top of PyLops and contains both CPU and GPU versions
-of each code (see ``notebooks`` and ``scripts`` folder). 
+of each code (see ``notebooks`` and ``scripts`` folders). 
 
 Note that the ``USE_CUPY`` variable can be used to switch between the CPU and GPU versions of each code. Also note that the CPU 
 version of the ``overthrust3d`` example will be very slow compared to its GPU equivalent!
 
-For more details refer to the accompanying paper **Multi-component local slopes and thier application to wavefield reconstruction problems
-Ravasi M., Vasconcelos I.** submitted to EAGE 2023.
+For more details refer to the accompanying paper **Multichannel wavefield reconstruction using smooth slopes information from multicomponent data -
+Ravasi M., Ruan, J, and Vasconcelos I.** submitted to EAGE 2023.
 
 ## Project structure
 This repository is organized as follows:
@@ -37,8 +37,8 @@ The following notebooks are provided:
 ## Scripts
 The following scripts are provided:
 
-- :orange_book: ``2d/Interpolation_slopes.ipynb``: script performing multi-channel interpolation with local slopes of a 2d shot gather;
-- :orange_book: ``3d/Interpolation_slopes.ipynb``: script performing multi-channel interpolation with local slopes of a 3d shot gather.
+- :orange_book: ``2d/Interpolation_slopes.ippyynb``: script performing multi-channel interpolation with local slopes of a 2d shot gather;
+- :orange_book: ``3d/Interpolation_slopes.py``: script performing multi-channel interpolation with local slopes of a 3d shot gather.
 
 Both scripts require an input ``.npz`` file containing the following fields. 
 
