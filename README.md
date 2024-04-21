@@ -32,6 +32,8 @@ The following notebooks are provided:
   multi-channel data reconstruction on a 2D shot gather from the Missisipi Canyon data;
 - :orange_book: ``overthrust3d/Interpolation_Ove3D.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
   multi-channel data reconstruction on a 3D shot gather modelled from the SEG/EAGE Overthrust model;
+- :orange_book: ``overthrust3d/Interpolationwin_Ove3D.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
+  multi-channel data reconstruction with fk sliding windows on a 3D shot gather modelled from the SEG/EAGE Overthrust model;
 
 
 ## Scripts
