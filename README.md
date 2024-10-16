@@ -26,14 +26,14 @@ The following notebooks are provided:
 - :orange_book: ``others/Slopes_comparison_hyperbolic.ipynb``: notebook comparing different slope estimation methods
   on a set of hyperbolic events;
 - :orange_book: ``others/NMO_gradient.ipynb``: notebook computing NMO of gradient data as in Robertsson et al., 2008;
-- :orange_book: ``gom/Create_data.ipynb``: notebook showing how to synthetically create multi-channel, subsampled data to be fed to
-  our reconstruction notebooks ans scripts;
+- :orange_book: ``gom/Create_data.ipynb``: notebook showing how to synthetically create multi-channel, subsampled data to be fed to our reconstruction notebooks ans scripts;
 - :orange_book: ``gom/Interpolation_GOM.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
   multi-channel data reconstruction on a 2D shot gather from the Missisipi Canyon data;
+- :orange_book: ``overthrust3d/Create_data.ipynb``: notebook saving FD model data and correcting the particle velocity measurement to a pressure spatial gradient data;
+- :orange_book: ``overthrust3d/Derivativechecking_Ove3D.ipynb``: notebook comparing 2 approaches to compute spatial derivatives of pressure data;
 - :orange_book: ``overthrust3d/Interpolation_Ove3D.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
   multi-channel data reconstruction on a 3D shot gather modelled from the SEG/EAGE Overthrust model;
-- :orange_book: ``overthrust3d/Interpolationwin_Ove3D.ipynb``: notebook performing single-channel, multi-channel and slope-assisted 
-  multi-channel data reconstruction with fk sliding windows on a 3D shot gather modelled from the SEG/EAGE Overthrust model;
+- :orange_book: ``overthrust3d/Interpolationwin_Ove3D.ipynb``: notebook performing single-channel, multi-channel and slope-assisted multi-channel data reconstruction with fk sliding windows on a 3D shot gather modelled from the SEG/EAGE Overthrust model;
 
 
 ## Scripts
