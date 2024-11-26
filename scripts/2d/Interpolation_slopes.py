@@ -99,7 +99,9 @@ def main(parser):
         dataorig = fload1['data'].T
 
     nxorig = xorig.size
-    nx, nt = x.size, t.size
+    nx, nt = x.size, t.size  
+    nfft_t = nt if nfft_t is None else nfft_t
+    nfft_x = nx if nfft_x is None else nfft_x
 
     # Create time gain
     gain = (t / 2.)[:, np.newaxis]

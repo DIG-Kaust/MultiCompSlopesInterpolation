@@ -39,7 +39,7 @@ The following notebooks are provided:
 ## Scripts
 The following scripts are provided:
 
-- :orange_book: ``2d/Interpolation_slopes.ippyynb``: script performing multi-channel interpolation with local slopes of a 2d shot gather;
+- :orange_book: ``2d/Interpolation_slopes.py``: script performing multi-channel interpolation with local slopes of a 2d shot gather;
 - :orange_book: ``3d/Interpolation_slopes.py``: script performing multi-channel interpolation with local slopes of a 3d shot gather.
 
 Both scripts require an input ``.npz`` file containing the following fields. 

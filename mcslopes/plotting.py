@@ -54,7 +54,7 @@ def plot_reconstruction_2d(data, datarec, Fop, x, t, dx, f, ks, vel):
     """
     D = Fop * data
     Drec = Fop * datarec
-    nt = data.shape[1]
+    nfft_t = Fop.f2.size
 
     fig, axs = plt.subplots(2, 3, figsize=(12, 12), gridspec_kw={'height_ratios': [2, 1]})
     axs[0, 0].imshow(data.T, cmap='gray', aspect='auto', vmin=-1, vmax=1,
@@ -71,21 +71,21 @@ def plot_reconstruction_2d(data, datarec, Fop, x, t, dx, f, ks, vel):
     axs[0, 2].set_title('Error')
     axs[0, 2].set_xlabel('Offset (m)')
 
-    axs[1, 0].imshow(np.fft.fftshift(np.abs(D).T)[nt // 2:], cmap='gist_ncar_r', aspect='auto', vmin=0, vmax=1e1,
-                     extent=(np.fft.fftshift(ks)[0], np.fft.fftshift(ks)[-1], f[nt // 2 - 1], f[0]))
+    axs[1, 0].imshow(np.fft.fftshift(np.abs(D).T)[nfft_t // 2:], cmap='gist_ncar_r', aspect='auto', vmin=0, vmax=1e1,
+                     extent=(np.fft.fftshift(ks)[0], np.fft.fftshift(ks)[-1], f[nfft_t // 2 - 1], f[0]))
     axs[1, 0].plot(f / vel, f, 'w'), axs[1, 0].plot(f / vel, -f, 'w')
     axs[1, 0].set_xlim(-1 / (2 * dx), 1 / (2 * dx))
     axs[1, 0].set_ylim(50, 0)
     axs[1, 0].set_xlabel('Wavenumber (1/m)')
     axs[1, 0].set_ylabel('Frequency (Hz)')
-    axs[1, 1].imshow(np.fft.fftshift(np.abs(Drec).T)[nt // 2:], cmap='gist_ncar_r', aspect='auto', vmin=0, vmax=1e1,
-                     extent=(np.fft.fftshift(ks)[0], np.fft.fftshift(ks)[-1], f[nt // 2 - 1], f[0]))
+    axs[1, 1].imshow(np.fft.fftshift(np.abs(Drec).T)[nfft_t // 2:], cmap='gist_ncar_r', aspect='auto', vmin=0, vmax=1e1,
+                     extent=(np.fft.fftshift(ks)[0], np.fft.fftshift(ks)[-1], f[nfft_t // 2 - 1], f[0]))
     axs[1, 1].plot(f / vel, f, 'w'), axs[1, 1].plot(f / vel, -f, 'w')
     axs[1, 1].set_xlim(-1 / (2 * dx), 1 / (2 * dx))
     axs[1, 1].set_ylim(50, 0)
     axs[1, 1].set_xlabel('Wavenumber (1/m)')
-    axs[1, 2].imshow(np.fft.fftshift(np.abs(D - Drec).T)[nt // 2:], cmap='gist_ncar_r', aspect='auto', vmin=0, vmax=1e1,
-                     extent=(np.fft.fftshift(ks)[0], np.fft.fftshift(ks)[-1], f[nt // 2 - 1], f[0]))
+    axs[1, 2].imshow(np.fft.fftshift(np.abs(D - Drec).T)[nfft_t // 2:], cmap='gist_ncar_r', aspect='auto', vmin=0, vmax=1e1,
+                     extent=(np.fft.fftshift(ks)[0], np.fft.fftshift(ks)[-1], f[nfft_t // 2 - 1], f[0]))
     axs[1, 2].plot(f / vel, f, 'w'), axs[1, 2].plot(f / vel, -f, 'w')
     axs[1, 2].set_xlim(-1 / (2 * dx), 1 / (2 * dx))
     axs[1, 2].set_ylim(50, 0)

@@ -109,6 +109,9 @@ def main(parser):
 
     nyorig = yorig.size
     ny, nx, nt = y.size, x.size, t.size
+    nfft_t = nt if nfft_t is None else nfft_t
+    nfft_x = nx if nfft_x is None else nfft_x
+    nfft_y = nx if nfft_y is None else nfft_y
 
     # Normalize data
     dmax = data.max() * 0.1
