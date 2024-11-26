@@ -1,19 +1,22 @@
 name: mcslopes
 channels:
-  - defaults
+  - rapidsai
   - conda-forge
+  - nvidia
   - numba
+  - defaults
 dependencies:
-  - python>=3.8
+  - python==3.11
   - pip
-  - numba==0.55.2
+  - numba
   - icc_rt
   - numpy
   - scipy
   - matplotlib
+  - cupy
+  - cuda-version==11.8
   - ipython
   - jupyter
   - pylops
   - pip:
     - pyyaml
-

@@ -155,7 +155,7 @@ def restriction(nx, nsub, nt, dtype="float64"):
         Restriction operator
 
     """
-    # identify available traces
+    # Identify available traces
     traces_index = np.arange(nx)
     traces_index_sub = traces_index[::nsub]
 
@@ -249,7 +249,7 @@ def gradient_data(data, nfft_x, nfft_t, dx, dt):
     nx, nt = data.shape
     f = np.fft.fftfreq(nfft_t, dt)
     ks = np.fft.fftfreq(nfft_x, dx)
-    Fop = FFT2D(dims=(nx, nt), nffts=(nfft_x, nfft_t), dtype=np.complex)
+    Fop = FFT2D(dims=(nx, nt), nffts=(nfft_x, nfft_t), dtype=np.complex128)
 
     # apply FK transform to data
     D = Fop * data
@@ -510,7 +510,7 @@ def fk_filter_design(f, ks, vel, fmax, critical=1.00, koffset=0.002):
     mask = np.abs(kx) < (critical * np.abs(ff) / vel + koffset)
     mask = mask.T
     mask *= fmask[:, np.newaxis].astype(bool)
-    mask = mask.astype(np.float)
+    mask = mask.astype(np.float64)
 
     return mask
 
@@ -551,6 +551,6 @@ def fk_filter_design3d(f, kys, kxs, vel, fmax, critical=1.00, koffset=0.002):
     [ky, kx, ff] = np.meshgrid(kys, kxs, f, indexing='ij')
     mask = np.sqrt(np.abs(ky) ** 2 + np.abs(kx) ** 2) < (critical * np.abs(ff) / vel + koffset)
     mask *= fmask[np.newaxis, np.newaxis, :].astype(bool)
-    mask = mask.astype(np.float)
+    mask = mask.astype(np.float64)
 
     return mask
