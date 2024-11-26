@@ -171,6 +171,9 @@ def main(parser):
 
     ######### Multi-channel interpolation #########
 
+    # Turn to complex since we are now working with a complex model
+    Rop.dtype = np.complex128 
+
     # Let's start by setting the slope regularization term
     D1op0 = FirstDerivative(dims=(nyorig, nx, nt), axis=0, sampling=dy, order=5, edge=True, dtype=np_floatcconv)
     D1op1 = FirstDerivative(dims=(nyorig, nx, nt), axis=2, sampling=dt, order=5, edge=True, dtype=np_floatcconv)

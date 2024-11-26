@@ -154,6 +154,9 @@ def main(parser):
 
     ######### Multi-channel interpolation #########
 
+    # Turn to complex since we are now working with a complex model
+    Rop.dtype = np.complex128 
+
     # Let's start by setting the slope regularization term
     D1op0 = FirstDerivative(dims=(nxorig, nt), axis=0, sampling=dx, order=5, edge=True, dtype="complex128")
     D1op1 = FirstDerivative(dims=(nxorig, nt), axis=1, sampling=dt, order=5, edge=True, dtype="complex128")
@@ -201,7 +204,7 @@ def main(parser):
 
     if not true_solution:
         fig, axs = plt.subplots(2, 2, figsize=(12, 12), gridspec_kw={'height_ratios': [2, 1]})
-        axs[0, 0].imshow(data.T, cmap='gray', aspect='auto', vmin=-vlim, vmax=vlim,
+        axs[0, 0].imshow(data.real.T, cmap='gray', aspect='auto', vmin=-vlim, vmax=vlim,
                          extent=(x[0] / 1000, x[-1] / 1000, t[-1], t[0]))
         axs[0, 0].set_title('Original')
         axs[0, 0].set_xlabel('Offset (m)')
@@ -232,7 +235,7 @@ def main(parser):
         axs[0, 0].set_title('Original')
         axs[0, 0].set_xlabel('Offset (m)')
         axs[0, 0].set_ylabel('TWT (s)')
-        axs[0, 1].imshow(data.T, cmap='gray', aspect='auto', vmin=-vlim, vmax=vlim,
+        axs[0, 1].imshow(data.real.T, cmap='gray', aspect='auto', vmin=-vlim, vmax=vlim,
                          extent=(x[0]/1000, x[-1]/1000, t[-1], t[0]))
         axs[0, 1].set_title('Subsampled')
         axs[0, 1].set_xlabel('Offset (m)')
